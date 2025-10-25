@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>归宿照片拍摄预定系统 · Recycle X Chat GPT</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji';background:#0f172a;color:#e5e7eb}
+    .container{max-width:980px;margin:0 auto;padding:16px}
+    .card{background:#0b1220;border:1px solid #26324b;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+    h1{font-size:22px;margin:12px 0 0}
+    h2{font-size:18px;margin:0 0 8px}
+    label{display:block;font-size:14px;margin:10px 0 4px;color:#9ca3af}
+    input,select,textarea{width:100%;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;padding:8px}
+    textarea{min-height:80px}
+    .row{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:800px){.grid{display:grid;grid-template-columns:2fr 1fr;gap:16px} .row2{grid-template-columns:1fr 1fr} .row3{grid-template-columns:1fr 1fr 1fr}}
+    .btn{border:none;border-radius:14px;padding:10px 14px;font-size:14px;cursor:pointer;background:#e5e7eb;color:#0f172a}
+    .btn.ghost{background:transparent;border:1px solid #334155;color:#e5e7eb}
+    .btn.warn{background:#fca5a5;color:#0b1220}
+    .btn.danger{background:#ef4444;color:white}
+    .muted{color:#94a3b8;font-size:12px}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
+    .b-pending{background:#f59e0b22;color:#fbbf24}
+    .b-accepted{background:#10b98122;color:#34d399}
+    .b-rejected{background:#ef444422;color:#f87171}
+    .b-cancelled{background:#64748b22;color:#cbd5e1}
+    .rowline{display:grid;grid-template-columns:160px 1fr;border-top:1px solid #1f2937}
+    .rowline>div{padding:8px 10px}
+    .right{text-align:right}
+    .flex{display:flex;gap:8px;flex-wrap:wrap}
+    .center{text-align:center}
+    a{color:#93c5fd}
+    .date-wrap{position:relative}
+    .date-ph{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#475569}
+    .date-wrap input::-webkit-calendar-picker-indicator{filter:invert(1);}
+    .hidden{display:none}
+    /* modal */
+    .mask{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);display:none}
+    .dialog{max-width:420px;margin:10vh auto}
+  </style>
+  <!-- Inline qrcode.js (subset) -->
+  <script>
+!function(){function u(t){this.mode=4,this.data=t}function e(t,e){this.typeNumber=t,this.errorCorrectLevel=e,this.modules=null,this.moduleCount=0,this.dataList=[]}function r(){this.buffer=[],this.length=0}function n(t,e){if(void 0==t.length)throw new Error(t.length+"/"+e);for(var r=0;r<t.length&&0==t[r];)r++;this.num=new Array(t.length-r+e);for(var n=0;n<t.length-r;n++)this.num[n]=t[n+r]}function o(t,e){this.totalCount=t,this.dataCount=e}var i={L:1,M:0,Q:3,H:2},f=function(){for(var t=new Array(256),e=new Array(256),r=0;r<8;r++)e[r]=1<<r;for(r=8;r<256;r++)e[r]=e[r-4]^e[r-5]^e[r-6]^e[r-8];for(r=0;r<256;r++)t[e[r]]=r;return{glog:function(e){if(e<1)throw new Error("glog("+e+")");return t[e]},gexp:function(t){for(;t<0;)t+=255;for(;t>=256;)t-=255;return e[t]}}}();u.prototype={getLength:function(){return this.data.length},write:function(t){for(var e=0;e<this.data.length;e++)t.put(this.data.charCodeAt(e),8)}};var a=[1,26,19,1,26,16,1,26,13,1,26,9,1,44,34,1,44,28,1,44,22,1,44,16,1,70,55,1,70,44,2,35,17,2,35,13,1,100,80,2,50,32,2,50,24,4,25,9];o.getRSBlocks=function(t,e){return function(t,e){for(var r=a[4*(t-1)+e],n=[],o=0;o<r.length/3;o++)for(var i=r[3*o+0],f=r[3*o+1],u=r[3*o+2],s=0;s<i;s++)n.push(new l(f,u));return n}(t,function(t){return t==i.L?0:t==i.M?1:t==i.Q?2:3}(e))};var l=function(t,e){this.totalCount=t,this.dataCount=e};function s(){var t=[],e=0;return{getLengthInBits:function(){return e},put:function(r,n){for(var o=0;o<n;o++)this.putBit(1==(r>>>n-o-1&1))},putBit:function(r){e==8*t.length&&t.push(0),r&&(t[Math.floor(e/8)]|=128>>>e%8),e++},buffer:t}}function h(t,e){return new n(t,0).mod(e)}n.prototype={get:function(t){return this.num[t]},getLength:function(){return this.num.length},multiply:function(t){for(var e=new Array(this.getLength()+t.getLength()-1),r=0;r<this.getLength();r++)for(var n=0;n<t.getLength();n++)e[r+n]^=f.gexp(f.glog(this.get(r))+f.glog(t.get(n)));return new n(e,0)},mod:function(t){if(this.getLength()-t.getLength()<0)return this;for(var e=f.glog(this.get(0))-f.glog(t.get(0)),r=new Array(this.getLength()),o=0;o<this.getLength();o++)r[o]=this.get(o);for(o=0;o<t.getLength();o++)r[o]^=f.gexp(f.glog(t.get(o))+e);return new n(r,0).mod(t)}};function c(t,e){this._el=t,this._opt=e}e.prototype={addData:function(t){this.dataList.push(new u(t))},isDark:function(t,e){return null!=this.modules[t][e]&&this.modules[t][e]},getModuleCount:function(){return this.moduleCount},make:function(){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var t=0;t<this.moduleCount;t++){this.modules[t]=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++)this.modules[t][e]=null}this._setupPos(0,0),this._setupPos(this.moduleCount-7,0),this._setupPos(0,this.moduleCount-7),this._setupTiming(),this._setupTypeInfo(!1);var r=function(t){for(var r=1/0,n=0,o=null,i=0;i<8;i++){t._makeImpl(0,i);var f=t._lostPoint();f<r&&(r=f,n=i,o=t.modules)}return t.modules=o,n}(this);this._mapData(this._createData(0),r)},_setupPos:function(t,e){for(var r=-1;r<=7;r++)if(!(t+r<=-1||this.moduleCount<=t+r))for(var n=-1;n<=7;n++)e+n<=-1||this.moduleCount<=e+n||(this.modules[t+r][e+n]=r>=0&&r<=6&&(0==n||6==n)||n>=0&&n<=6&&(0==r||6==r)||r>=2&&r<=4&&n>=2&&n<=4)},_setupTiming:function(){for(var t=8;t<this.moduleCount-8;t++)null==this.modules[t][6]&&(this.modules[t][6]=t%2==0);for(var e=8;e<this.moduleCount-8;e++)null==this.modules[6][e]&&(this.modules[6][e]=e%2==0)},_setupTypeInfo:function(t){for(var e=0;e<15;e++)this.modules[e<6?e:e<8?e+1:this.moduleCount-15+e][8]=!t,this.modules[8][e<8?this.moduleCount-15+e:e<9?e+1:e+1]=!t},_makeImpl:function(t,e){this._maskPattern=e},_lostPoint:function(){return 0},_createData:function(t){for(var e=1;e<5;e++){var r=o.getRSBlocks(e,0),n=s();this.dataList.forEach(function(t){n.put(4,4),n.put(t.getLength(),8),t.write(n)});var i=0;r.forEach(function(t){i+=t.dataCount});if(n.getLengthInBits()<=8*i){for(;n.getLengthInBits()+4<=8*i;)n.put(0,4);for(;n.getLengthInBits()%8!=0;)n.putBit(!1);for(var f=0,a=0,l=new Array(r.length),h=0;h<r.length;h++)a=r[h].dataCount,l[h]=new Array(a);for(h=0;h<l.length;h++)for(var c=0;c<l[h].length;c++)l[h][c]=255&(n.buffer[f]||0),f++;return l}}return null},_mapData:function(t,e){for(var r=this.moduleCount-1,n=this.moduleCount-1,o=!0,i=0,f=0;n>0;n-=2){6==n&&n--;for(;;){for(var u=0;u<2;u++)null==this.modules[r][n-u]&&(this.modules[r][n-u]=i<t.length&&1==(t[i][f]>>>7&1)),f++;if(o){if(--r<0)break}else if(++r>=this.moduleCount)break}o=!o}},draw:function(t){this.modules||this.make();var r=this.getModuleCount(),n=this._opt.width/r,o=this._opt.height/r,i=document.createElement("canvas"),f=i.getContext("2d"),u=this._opt.background||"#fff",a=this._opt.colorDark||"#000",l=Math.ceil(r*n),s=Math.ceil(r*o);for(i.width=l,i.height=s,f.fillStyle=u,f.fillRect(0,0,l,s),f.fillStyle=a,t&&(this.modules=t),y=0;y<r;y++)for(var h=0;h<r;h++)this.modules[y][h]&&f.fillRect(Math.round(h*n),Math.round(y*o),Math.ceil(n),Math.ceil(o));this._el.innerHTML="",this._el.appendChild(i)}};window.SimpleQR=function(t,r){return new c(t,{width:r||160,height:r||160,colorDark:"#000",background:"#fff"})}();
+  </script>
+</head>
+<body>
+  <div class="container" id="topbar">
+    <div class="card flex" style="justify-content:space-between;align-items:center">
+      <div>
+        <h1>归宿照片拍摄预定系统</h1>
+        <div class="muted">Made by Recycle X Chat GPT</div>
+      </div>
+      <div>
+        <button class="btn ghost" id="adminBtn">管理登录</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid container" id="clientGrid" style="margin-top:16px;display:none"></div>
+  <div class="container" id="adminPage" style="display:none"></div>
+
+  <div class="container">
+    <div class="card center" style="margin-top:16px">
+      © <span id="year"></span> 项目名称：归宿照片拍摄预定系统 · 品牌：Made by Recycle X Chat GPT
+    </div>
+  </div>
+
+  <!-- 登录弹窗 -->
+  <div id="loginMask" class="mask">
+    <div class="card dialog">
+      <h2>管理登录</h2>
+      <input type="password" id="pwd" placeholder="请输入口令"/>
+      <div id="pwdErr" class="muted" style="color:#fca5a5;margin-top:6px"></div>
+      <div class="flex right" style="margin-top:10px;justify-content:flex-end">
+        <button class="btn ghost" id="cancelLogin">取消</button>
+        <button class="btn" id="okLogin">登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改口令弹窗 -->
+  <div id="pwdMask" class="mask">
+    <div class="card dialog">
+      <h2>修改口令</h2>
+      <label>当前口令</label>
+      <input type="password" id="curPwd" placeholder="请输入当前口令"/>
+      <label>新口令</label>
+      <input type="password" id="newPwd" placeholder="至少 6 位，建议包含字母与数字"/>
+      <label>确认新口令</label>
+      <input type="password" id="newPwd2" placeholder="再次输入新口令"/>
+      <div id="pwdChangeErr" class="muted" style="color:#fca5a5;margin-top:6px"></div>
+      <div class="flex right" style="margin-top:10px;justify-content:flex-end">
+        <button class="btn ghost" id="cancelPwdChange">取消</button>
+        <button class="btn" id="okPwdChange">保存</button>
+      </div>
+      <div class="muted" style="margin-top:8px">提示：仅保存在本机浏览器，不会上传到服务器。</div>
+    </div>
+  </div>
+
+<script>
+// ---- 常量 & 工具 ----
+const DEFAULT_ADMIN_PWD = "photoadmin0000"; // 默认口令，不在UI显示
+const ADMIN_PWD_KEY = "guishu_admin_pwd_v1";
+
+const $ = (id)=>document.getElementById(id);
+const defaultOptions = ["迷雾山庄","221B","沉默的律师事务所","庄园之声","德罗斯小姐的公寓"];
+const STATE_KEY="guishu_reservations_v12";
+const BLOCK_KEY="guishu_block_day_v12";
+const DRAFT_KEY="guishu_client_draft_v12";
+const CANCEL_WINDOW_MS = 2 * 60 * 60 * 1000; // 2小时
+
+function getAdminPwd(){ return localStorage.getItem(ADMIN_PWD_KEY) || DEFAULT_ADMIN_PWD; }
+function setAdminPwd(v){ localStorage.setItem(ADMIN_PWD_KEY, v); }
+
+function todayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0')}
+function isBlockedToday(){return localStorage.getItem(BLOCK_KEY)===todayKey()}
+function loadDb(){try{return JSON.parse(localStorage.getItem(STATE_KEY)||"[]")}catch{return[]}}
+function saveDb(arr){localStorage.setItem(STATE_KEY,JSON.stringify(arr))}
+function hashCode(str){let h=0;for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0}return Math.abs(h)}
+function genRid(f){const base=(f.gameNickname||"anon")+"-"+(f.gameNumericId||"0000").slice(-4)+"-"+(f.date||"xxxxxx");return "R-"+hashCode(base).toString(16).slice(0,8).toUpperCase()}
+function buildClientLink(rid){const u=new URL(window.location.href);u.searchParams.set("rid",rid);u.searchParams.delete("admin");return u.toString()}
+function row(k,v){ return '<div class="rowline"><div class="muted">'+k+'</div><div>'+v+'</div></div>'; }
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}
+function badge(s){const map={pending:'b-pending',accepted:'b-accepted',rejected:'b-rejected',cancelled:'b-cancelled'}; const text={pending:'待处理',accepted:'已接受',rejected:'已拒绝',cancelled:'已取消'}; return '<span class="badge '+map[s]+'">'+text[s]+'</span>'}
+function fmtDuration(ms){const m=Math.ceil(ms/60000); return m<=0? '已过期' : (m+' 分钟后截止');}
+
+$("year").textContent=new Date().getFullYear();
+
+// ---- 路由 ----
+const q=new URLSearchParams(location.search);
+if(q.get("admin")==="1"){ openLogin(); }
+renderClient();
+
+function renderClient(){
+  const grid = $("clientGrid"); grid.style.display="grid"; grid.innerHTML="";
+  const left = document.createElement("div"); const right = document.createElement("div");
+  left.innerHTML = '<div class="card" id="clientCard"></div>';
+  right.innerHTML = '<div class="card"><h2>使用说明</h2><ul class="muted"><li>填写必填信息并勾选条款；</li><li>预览确认后提交；</li><li>提交成功后将跳到详情页并显示一次二维码（仅首次）。</li><li>管理员一旦处理，该预约将不可自助取消。</li></ul></div><div class="card" style="margin-top:16px"><h2>今日受理状态</h2><div class="muted" id="blockInfo">客户可正常提交</div></div>';
+  grid.appendChild(left); grid.appendChild(right);
+  renderBlockInfo();
+
+  const rid = q.get("rid");
+  const just = q.get("just")==="1";
+  if(rid){ renderDetailPage(rid, just); } else { renderFormPage(); }
+}
+
+// ---- 客户详情页 ----
+function renderDetailPage(rid, just){
+  const card = $("clientCard");
+  const db = loadDb();
+  const item = db.find(x=>x.id===rid);
+  if(!item){ card.innerHTML='<h2>预约详情</h2><div class="muted">未找到该预约，可能已被删除或管理员已清除记录。</div>'; return; }
+  const f = item.form;
+  const operated = !!item.operated;
+  const withinWindow = (Date.now() - item.createdAt) < CANCEL_WINDOW_MS;
+  const canCancel = !operated && withinWindow && (item.status==='pending' || item.status==='accepted');
+  const leftMs = item.createdAt + CANCEL_WINDOW_MS - Date.now();
+
+  // 顶部成功条（仅从提交跳转过来显示）
+  let successBar = '';
+  if(just){
+    successBar = '<div class="card center" style="background:#07201a;border-color:#14532d;margin-bottom:10px"><div>表单已提交 ✓</div><div id="qrWrap" style="margin-top:6px"></div><div class="muted">扫码可在手机再次打开此详情链接（仅首次显示）。</div></div>';
+    const u = new URL(location.href); u.searchParams.delete("just"); history.replaceState({}, "", u);
+    setTimeout(()=>{ try{ SimpleQR($("qrWrap"), 160).draw(buildClientLink(rid)); }catch(e){} }, 0);
+  }
+
+  card.innerHTML = '<h2>预约详情</h2>' + successBar
+    + '<div class="card" style="background:#0a0f1a;border-color:#1f2937">'+
+      row("状态", badge(item.status)) +
+      row("游戏昵称", escapeHtml(f.gameNickname)) +
+      row("微信昵称", escapeHtml(f.wechatNickname)) +
+      row("游戏数字ID", escapeHtml(f.gameNumericId)) +
+      row("预定归宿", escapeHtml(f.guisuType)) +
+      row("日期", escapeHtml(f.date)) +
+      row("拍照主题数", String(f.themeCount)) +
+      row("拍照主题/要求", escapeHtml(f.themeNote)) +
+    '</div>' +
+    '<div class="muted" style="margin-top:8px">'+ (operated ? '该预约已由管理员处理，您不可自助取消。' : '提示：提交后 2 小时内可取消，超过时限将自动取消。') + '</div>' +
+    (canCancel ? '<div class="flex" style="margin-top:10px"><button class="btn warn" id="selfCancelBtn">取消预约</button></div><div class="muted" id="deadlineText">'+fmtDuration(leftMs)+'</div>' : '');
+
+  // 倒计时 & 自动取消
+  if(canCancel){
+    const tick = () => {
+      const dbNow=loadDb(); const it=dbNow.find(x=>x.id===rid); if(!it){return;}
+      if(it.operated){ renderDetailPage(rid,false); return; }
+      const ms = it.createdAt + CANCEL_WINDOW_MS - Date.now();
+      const d = $("deadlineText");
+      if(d){
+        if(ms<=0){
+          if(it.status==='pending' || it.status==='accepted'){ it.status='cancelled'; saveDb(dbNow); renderDetailPage(rid,false); }
+          else { d.textContent='已过期'; }
+          return;
+        } else {
+          d.textContent = fmtDuration(ms);
+        }
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    $("selfCancelBtn").onclick = ()=>{
+      const db2=loadDb(); const it=db2.find(x=>x.id===rid); if(!it) return;
+      if(it.operated){ alert("该预约已由管理员处理，不能自助取消"); renderDetailPage(rid,false); return; }
+      if((Date.now()-it.createdAt) > CANCEL_WINDOW_MS){ alert("已超过可取消时限"); renderDetailPage(rid,false); return; }
+      if(!(it.status==='pending' || it.status==='accepted')){ alert("当前状态不可取消"); return; }
+      it.status='cancelled'; saveDb(db2); alert("已取消"); renderDetailPage(rid,false);
+    };
+  }
+}
+
+// ---- 表单页 ----
+function renderFormPage(){
+  const card = $("clientCard");
+  const blocked = isBlockedToday();
+  card.innerHTML = '<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 id="stepTitle">填写信息</h2><div class="muted">预约编号：<code id="rid"></code></div></div>'
+    + '<div id="step1"></div><div id="step2" style="display:none"></div>';
+
+  const step1 = $("step1");
+  step1.innerHTML = (blocked ? '<div class="muted" style="color:#facc15">今日预约已暂停受理，请明天再试或联系管理员。</div>':'' )
+    + '<div class="row row2">'
+    + field("游戏昵称 *", '<input id="gameNickname" placeholder="请输入游戏里的昵称"/>')
+    + field("游戏数字ID *", '<input id="gameNumericId" placeholder="仅数字"/>')
+    + field("微信昵称 *", '<input id="wechatNickname" placeholder="请填写常用微信昵称"/>')
+    + field("手机号 *", '<input id="phone" placeholder="请输入手机号"/>')
+    + '</div>'
+    + '<div class="row row3">'
+    + field("预定归宿 *", '<select id="guisuType"></select><div class="muted">* 提示：将根据所选拍照类型自动选择方案</div>')
+    + dateField("日期 *", '<input type="date" id="date"/>', 'YYYY/MM/DD')
+    + field("拍照主题数 *", '<input type="number" id="themeCount" min="1" value="1"/>')
+    + '</div>'
+    + field("拍照主题 *", '<textarea id="themeNote" placeholder="请写出与数量对应的拍照主题和您的要求"></textarea>')
+    + '<label class="flex" style="align-items:center"><input type="checkbox" id="agree" style="width:16px;height:16px;margin-right:8px"/>我已阅读并同意 <a href="#" onclick="return false">《隐私与预约条款》</a></label>'
+    + '<div id="err" class="muted" style="color:#fca5a5;margin-top:4px"></div>'
+    + '<div class="flex" style="margin-top:10px"><button class="btn" id="previewBtn" '+(blocked?'disabled':'')+'>预览并确认</button><button class="btn ghost" id="resetBtn">重置</button></div>';
+
+  // 初始化选项、草稿、rid
+  defaultOptions.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;$("guisuType").appendChild(o)});
+  function collectForm(){ return {gameNickname:$("gameNickname").value.trim(), gameNumericId:$("gameNumericId").value.trim(), wechatNickname:$("wechatNickname").value.trim(), phone:$("phone").value.trim(), guisuType:$("guisuType").value, date:$("date").value.trim()?formatDateSlash($("date").value.trim()):"", themeCount:Number($("themeCount").value||1), themeNote:$("themeNote").value.trim()} }
+  function updateRid(){ const rid=genRid(collectForm()); $("rid").textContent=rid; }
+  try{const s=localStorage.getItem(DRAFT_KEY); if(s){const f=JSON.parse(s); setForm(f);} }catch{}
+  function setForm(f){ $("gameNickname").value=f.gameNickname||""; $("gameNumericId").value=f.gameNumericId||""; $("wechatNickname").value=f.wechatNickname||""; $("phone").value=f.phone||""; $("guisuType").value=f.guisuType||defaultOptions[0]; if(f.date){const dash=f.date.replace(/\//g,'-'); $("date").value=dash;} $("themeCount").value=f.themeCount||1; $("themeNote").value=f.themeNote||""; toggleDatePh(); }
+  ["gameNickname","gameNumericId","phone","date"].forEach(id=>{ $(id).addEventListener("input",()=>{ updateRid(); localStorage.setItem(DRAFT_KEY,JSON.stringify(collectForm())); if(id==='date') toggleDatePh(); })});
+  ["wechatNickname","guisuType","themeCount","themeNote"].forEach(id=>{ $(id).addEventListener("input",()=>{ localStorage.setItem(DRAFT_KEY,JSON.stringify(collectForm())); })});
+  updateRid();
+  $("resetBtn").onclick=()=>{ setForm({}); $("agree").checked=false; $("err").textContent=""; localStorage.removeItem(DRAFT_KEY); updateRid(); };
+
+  function toggleDatePh(){ const has=$("date").value; const ph=document.querySelector('.date-ph'); if(ph){ ph.classList.toggle('hidden', !!has); } }
+
+  $("previewBtn").onclick=()=>{
+    const f=collectForm();
+    const err=[];
+    if(!f.gameNickname) err.push("请输入游戏昵称");
+    if(!/^\d{3,20}$/.test(f.gameNumericId)) err.push("请输入纯数字的游戏ID（3-20位）");
+    if(!f.wechatNickname) err.push("请输入微信昵称");
+    if(!/^\d{11}$/.test(f.phone)) err.push("手机号格式不正确，需为 11 位数字");
+    if(!/^\d{4}\/\d{2}\/\d{2}$/.test(f.date)) err.push("日期格式必须为 YYYY/MM/DD");
+    if(!(f.themeCount>=1)) err.push("拍照主题数至少为 1");
+    if(!f.themeNote) err.push("请填写拍照主题与要求");
+    if(!$("agree").checked) err.push("请先阅读并勾选同意条款");
+    if(isBlockedToday()) err.push("今日预约已暂停受理，请明天再试或联系管理员。");
+    if(err.length){ $("err").textContent=err.join("；"); return; }
+    $("err").textContent="";
+    // 渲染预览
+    const step2=$("step2"); const step1=$("step1"); step1.style.display="none"; step2.style.display="block"; $("stepTitle").textContent="预览确认";
+    step2.innerHTML = '<div class="muted">请确认以下信息是否正确：</div><div id="previewBox" class="card" style="background:#0a0f1a;border-color:#1f2937"></div><div class="flex" style="margin-top:10px"><button class="btn" id="submitBtn">提交</button><button class="btn ghost" id="backBtn">返回修改</button></div>';
+    $("backBtn").onclick=()=>{ step2.style.display="none"; step1.style.display="block"; $("stepTitle").textContent="填写信息"; };
+    $("submitBtn").onclick=submit;
+    $("previewBox").innerHTML=row("预约编号","<code>"+$("rid").textContent+"</code>")+row("游戏昵称",f.gameNickname)+row("游戏数字ID",f.gameNumericId)+row("微信昵称",f.wechatNickname)+row("手机号",f.phone)+row("预定归宿",f.guisuType)+row("日期",f.date)+row("拍照主题数",String(f.themeCount))+row("拍照主题/要求",escapeHtml(f.themeNote));
+  };
+
+  function submit(){
+    const rid=$("rid").textContent;
+    const f={gameNickname:$("gameNickname").value.trim(), gameNumericId:$("gameNumericId").value.trim(), wechatNickname:$("wechatNickname").value.trim(), phone:$("phone").value.trim(), guisuType:$("guisuType").value, date:formatDateSlash($("date").value.trim()), themeCount:Number($("themeCount").value||1), themeNote:$("themeNote").value.trim()};
+    const db=loadDb(); const rec={id:rid,createdAt:Date.now(),status:"pending",operated:false,form:f}; const ex=db.find(x=>x.id===rid); if(!ex) db.push(rec); else Object.assign(ex,rec); saveDb(db);
+    localStorage.removeItem(DRAFT_KEY);
+    // 跳到详情页并携带 just=1，展示成功条 + 二维码一次
+    const u=new URL(location.href); u.searchParams.set("rid",rid); u.searchParams.set("just","1");
+    location.assign(u.toString());
+  }
+}
+
+function dateField(label, inner, ph){
+  return '<div class="date-wrap"><label>'+label+'</label>'+inner+'<span class="date-ph">'+ph+'</span></div>';
+}
+function formatDateSlash(v){ if(!v) return ""; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ const [y,m,d]=v.split('-'); return y+'/'+m+'/'+d; } return v; }
+
+function field(label, inner){ return '<div><label>'+label+'</label>'+inner+'</div>'; }
+function renderBlockInfo(){ $("blockInfo").textContent = isBlockedToday() ? "已暂停受理（今日）" : "客户可正常提交"; }
+
+// ---- 管理页 ----
+$("adminBtn").onclick=()=>openLogin();
+function openLogin(){ $("loginMask").style.display="block"; if(new URLSearchParams(location.search).get("admin")!=="1"){ const u=new URL(location.href); u.searchParams.set("admin","1"); history.replaceState({}, "", u); } }
+$("cancelLogin").onclick=()=>{ $("loginMask").style.display="none"; const u=new URL(location.href); u.searchParams.delete("admin"); history.replaceState({}, "", u); };
+$("okLogin").onclick=()=>{ const pwd=$("pwd").value; if(pwd===getAdminPwd()){ $("loginMask").style.display="none"; showAdmin(); } else { $("pwdErr").textContent="口令错误"; } };
+
+function showAdmin(){
+  $("adminPage").style.display="block"; $("clientGrid").style.display="none"; $("topbar").style.display="";
+  $("adminPage").innerHTML = '<div class="card flex" style="justify-content:space-between;align-items:center"><h2>我的管理页</h2><div class="flex"><button class="btn ghost" id="changePwdBtn">修改口令</button><button class="btn ghost" id="toggleBlockBtn">今日拒绝接受预约（未开启）</button><button class="btn ghost" id="backClientBtn">返回客户页</button></div></div><div class="card" style="margin-top:12px"><div class="flex" style="justify-content:flex-end"><input id="search" placeholder="搜索编号/昵称/数字ID" style="max-width:240px"/><select id="statusFilter" style="max-width:140px"><option value="all">全部状态</option><option value="pending">待处理</option><option value="accepted">已接受</option><option value="rejected">已拒绝</option><option value="cancelled">已取消</option></select></div><div id="tableBox" style="margin-top:8px"></div></div>';
+  $("changePwdBtn").onclick=()=>{ $("pwdMask").style.display="block"; $("pwdChangeErr").textContent=""; $("curPwd").value=""; $("newPwd").value=""; $("newPwd2").value=""; };
+  $("toggleBlockBtn").onclick=()=>{ if(isBlockedToday()){ localStorage.removeItem(BLOCK_KEY); $("toggleBlockBtn").textContent="今日拒绝接受预约（未开启）"; } else { localStorage.setItem(BLOCK_KEY,todayKey()); $("toggleBlockBtn").textContent="今日拒绝接受预约（已开启）"; } renderBlockInfo(); };
+  $("backClientBtn").onclick=()=>{ $("adminPage").style.display="none"; renderClient(); };
+  if(isBlockedToday()) $("toggleBlockBtn").textContent="今日拒绝接受预约（已开启）";
+  $("search").oninput=renderAdminTable; $("statusFilter").onchange=renderAdminTable;
+  renderAdminTable();
+}
+
+// 修改口令逻辑
+$("cancelPwdChange").onclick=()=>{ $("pwdMask").style.display="none"; };
+$("okPwdChange").onclick=()=>{
+  const cur=$("curPwd").value;
+  const n1=$("newPwd").value;
+  const n2=$("newPwd2").value;
+  const err=$("pwdChangeErr");
+  err.textContent="";
+  if(cur!==getAdminPwd()){ err.textContent="当前口令不正确"; return; }
+  if(n1.length<6 || /\s/.test(n1)){ err.textContent="新口令至少 6 位且不能包含空格"; return; }
+  if(n1!==n2){ err.textContent="两次输入的新口令不一致"; return; }
+  setAdminPwd(n1);
+  $("pwdMask").style.display="none";
+  alert("口令已修改成功（仅保存在本机）。");
+};
+
+// 修改/登录弹窗外观控制（点击空白关闭）
+document.getElementById("pwdMask").addEventListener("click", (e)=>{ if(e.target.id==="pwdMask") e.currentTarget.style.display="none"; });
+document.getElementById("loginMask").addEventListener("click", (e)=>{ if(e.target.id==="loginMask") e.currentTarget.style.display="none"; });
+
+// ---- 管理表格 ----
+function renderAdminTable(){
+  const kw=($("search").value||"").toLowerCase(); const filt=$("statusFilter").value;
+  const list=loadDb().filter(x=>{
+    const hit=x.id.toLowerCase().includes(kw)||x.form.gameNickname.toLowerCase().includes(kw)||x.form.gameNumericId.includes(kw);
+    const ok=filt==="all" ? true : x.status===filt;
+    return hit && ok;
+  });
+  let html='<div class="rowline"><div class="muted">预约编号</div><div class="muted">详情 / 操作</div></div>';
+  if(list.length===0){ html+='<div style="padding:20px" class="muted">暂无数据</div>'; }
+  list.forEach(x=>{
+    html+='<div class="rowline"><div><div class="muted"><code>'+x.id+'</code></div><div><a href="'+buildClientLink(x.id)+'" target="_blank">客户链接</a></div></div><div>'
+      +'<div>'+x.form.gameNickname+' · '+x.form.wechatNickname+' · <b>'+x.form.gameNumericId+'</b></div>'
+      +'<div class="muted">'+x.form.guisuType+' · '+x.form.date+' · 主题数：'+x.form.themeCount+'</div>'
+      +'<div style="margin:6px 0">'+escapeHtml(x.form.themeNote)+'</div>'
+      +'<div>'+badge(x.status)+' '+(x.operated?'<span class="muted">(已处理)</span>':'')+'</div>'
+      +'<div class="flex" style="margin-top:6px">'+ops(x)+'</div>'
+      +'</div></div>';
+  });
+  $("tableBox").innerHTML=html;
+  document.querySelectorAll("[data-op]").forEach(btn=>{
+    btn.onclick=()=>{ const id=btn.getAttribute("data-id"); const op=btn.getAttribute("data-op"); const db=loadDb(); const idx=db.findIndex(x=>x.id===id); if(idx<0) return; 
+      const it=db[idx];
+      if(op==="delete"){ if(confirm("确定删除该预约记录？此操作不可撤销。")){ db.splice(idx,1); saveDb(db); renderAdminTable(); } return; }
+      if(it.status==="pending" && (op==="accepted"||op==="rejected")) { it.status=op; it.operated=true; }
+      else if(it.status==="accepted" && op==="cancelled") { it.status=op; it.operated=true; }
+      saveDb(db); renderAdminTable();
+    };
+  });
+}
+
+function ops(x){ 
+  let btns='';
+  if(x.status==='pending'){
+    btns+='<button class="btn" data-op="accepted" data-id="'+x.id+'">接受预约</button>';
+    btns+='<button class="btn ghost" data-op="rejected" data-id="'+x.id+'">拒绝预约</button>';
+  } else if(x.status==='accepted'){
+    btns+='<button class="btn warn" data-op="cancelled" data-id="'+x.id+'">取消预约</button>';
+  }
+  btns+='<button class="btn danger" data-op="delete" data-id="'+x.id+'">删除记录</button>';
+  return btns;
+}
+</script>
+</body>
+</html>
