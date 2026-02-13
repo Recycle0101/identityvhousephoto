@@ -1,915 +1,747 @@
-<!doctype html>
+from pathlib import Path
+
+html = """<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>归宿照片拍摄预定系统 · Admin Plus</title>
-  <meta name="description" content="预约提交（云端）+ 条形码 + 管理后台（搜索/扫码/状态/删除/导出）" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>归宿照片拍摄预约系统</title>
   <style>
     :root{
-      --bg:#0b0f17; --text:#e5e7eb; --muted:#9ca3af; --line:rgba(255,255,255,.10);
-      --card:rgba(255,255,255,.04); --shadow:0 10px 30px rgba(0,0,0,.35);
-      --brand:#7c3aed; --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; --info:#38bdf8;
-      --r:18px; --r2:12px;
-      --font: ui-sans-serif, system-ui, -apple-system, "PingFang SC","Microsoft YaHei", Segoe UI, Roboto, Arial;
+      --bg:#0b1220;
+      --card:#0f172a;
+      --card2:#0b1220;
+      --border:rgba(148,163,184,.18);
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#60a5fa;
+      --accent2:#93c5fd;
+      --danger:#ef4444;
+      --ok:#22c55e;
+      --shadow:0 14px 40px rgba(0,0,0,.45);
+      --radius:18px;
     }
     *{box-sizing:border-box}
     body{
-      margin:0; font-family:var(--font); color:var(--text); line-height:1.55;
-      background:
-        radial-gradient(1100px 700px at 10% 10%, rgba(124,58,237,.22), transparent 60%),
-        radial-gradient(900px 560px at 90% 20%, rgba(34,197,94,.14), transparent 55%),
-        radial-gradient(1000px 700px at 40% 100%, rgba(56,189,248,.10), transparent 60%),
-        var(--bg);
+      margin:0;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(96,165,250,.16), transparent 55%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(99,102,241,.12), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:34px 16px 48px;
     }
-    .wrap{max-width:1180px;margin:0 auto;padding:26px 16px 60px}
-    header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
-    h1{margin:0;font-size:22px;letter-spacing:.2px}
-    .sub{color:var(--muted);font-size:13px}
-    .pill{display:flex;gap:10px;flex-wrap:wrap}
-    .badge{
-      font-size:12px;color:var(--muted);border:1px solid var(--line);
-      padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.04);
-      box-shadow:var(--shadow);user-select:none
+    .wrap{width:min(1100px,100%);}
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:18px 18px;
+      box-shadow: var(--shadow);
+      margin-bottom:18px;
     }
-    .grid{display:grid;grid-template-columns: 1.02fr .98fr;gap:14px;margin-top:12px}
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .brand{line-height:1.1}
+    .brand h1{font-size:20px;margin:0 0 6px 0;font-weight:760;letter-spacing:.3px}
+    .brand .sub{font-size:12px;color:var(--muted)}
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      transition: .15s transform, .15s background;
+      user-select:none;
+      font-weight:650;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.09);}
+    .btn.primary{background: rgba(96,165,250,.18); border-color: rgba(96,165,250,.25);}
+    .btn.primary:hover{background: rgba(96,165,250,.24);}
+    .btn.danger{background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.22);}
+    .grid{
+      display:grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap:18px;
+    }
+    @media (max-width: 920px){
+      .grid{grid-template-columns: 1fr;}
+    }
     .card{
-      border:1px solid var(--line); border-radius:var(--r);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      box-shadow:var(--shadow); overflow:hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: var(--shadow);
     }
-    .hd{
-      padding:14px 14px 10px;border-bottom:1px solid var(--line);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      background:rgba(17,24,39,.70)
+    .card h2{
+      margin:0 0 12px 0;
+      font-size:16px;
+      letter-spacing:.3px;
     }
-    .hd h2{margin:0;font-size:14px;letter-spacing:.2px}
-    .bd{padding:14px}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tab{
-      border:1px solid var(--line); background:rgba(255,255,255,.03); color:var(--muted);
-      padding:8px 10px;border-radius:999px;cursor:pointer;font-size:13px;transition:.15s ease
+    .row{display:grid;grid-template-columns: 1fr 1fr;gap:12px;}
+    @media (max-width: 680px){ .row{grid-template-columns: 1fr;} }
+    .field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px 2px}
+    .field input,.field select,.field textarea{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(10,15,30,.55);
+      color:var(--text);
+      outline:none;
     }
-    .tab.active{color:var(--text);border-color:rgba(124,58,237,.65);background:rgba(124,58,237,.18)}
-    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
-    input,select,textarea{
-      width:100%; padding:10px 12px; border-radius:12px;
-      border:1px solid var(--line); background:rgba(15,23,42,.6); color:var(--text); outline:none;
+    .field textarea{min-height:100px;resize:vertical}
+    .field input::placeholder,.field textarea::placeholder{color:rgba(156,163,175,.7)}
+    .muted{color:var(--muted);font-size:12px}
+    .actions{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    .chk{display:flex;gap:10px;align-items:center;margin-top:12px;color:var(--muted);font-size:12px}
+    .chk input{width:18px;height:18px}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding:8px 10px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
     }
-    textarea{min-height:92px;resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:rgba(124,58,237,.7);box-shadow:0 0 0 3px rgba(124,58,237,.18)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width: 680px){ .row{grid-template-columns:1fr} }
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    button{
-      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
-      padding:10px 12px;border-radius:12px;cursor:pointer;transition:.15s ease;font-weight:800;font-size:13px;
+    .status{margin-top:12px;color:var(--muted);font-size:12px}
+    /* modal */
+    .mask{
+      position:fixed;inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999;
     }
-    button:hover{transform:translateY(-1px)}
-    button.primary{border-color:rgba(124,58,237,.65);background:rgba(124,58,237,.22)}
-    button.good{border-color:rgba(34,197,94,.65);background:rgba(34,197,94,.16)}
-    button.bad{border-color:rgba(239,68,68,.65);background:rgba(239,68,68,.14)}
-    button.warn{border-color:rgba(245,158,11,.65);background:rgba(245,158,11,.14)}
-    button.info{border-color:rgba(56,189,248,.65);background:rgba(56,189,248,.14)}
-    .hint{margin-top:10px;font-size:12px;color:var(--muted)}
-    .hint .ok{color:#86efac}
-    .hint .bad{color:#fca5a5}
-    .note{border:1px dashed rgba(255,255,255,.18);background:rgba(0,0,0,.18);border-radius:14px;padding:12px;color:var(--muted);font-size:12px}
-    .hide{display:none !important}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+    .mask.show{display:flex;}
+    .modal{
+      width:min(560px,100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border:1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalHead{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+    }
+    .modalHead strong{font-size:14px;letter-spacing:.2px}
+    .modalBody{padding:16px}
+    .x{background:transparent;border:0;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+    .barcodeBox{
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      overflow:hidden;
+    }
+    .notice{
+      display:flex;gap:10px;align-items:flex-start;
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding:12px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .adminWrap{display:none;}
+    .adminTop{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .adminTop .left{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
     .table{
-      width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(0,0,0,.16)
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius: 14px;
     }
-    .table th,.table td{border-bottom:1px solid var(--line);padding:10px;font-size:12px;vertical-align:top}
-    .table th{color:var(--muted);text-align:left;font-weight:900;background:rgba(255,255,255,.03)}
-    .table tr:last-child td{border-bottom:none}
-    .barcode-wrap{
-      margin-top:12px; padding:12px; border-radius:14px;
-      border:1px solid var(--line); background:rgba(255,255,255,.03);
+    .table th,.table td{
+      text-align:left;
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      font-size:12px;
+      vertical-align:top;
     }
-    .small{font-size:12px;color:var(--muted)}
-    .chip{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:6px 10px; border-radius:999px; border:1px solid var(--line);
-      background:rgba(255,255,255,.03); color:var(--muted); font-size:12px; user-select:none;
+    .table th{color:var(--muted);font-weight:650;background: rgba(255,255,255,.03);}
+    .table tr:last-child td{border-bottom:none;}
+    .tag{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:4px 8px;border-radius:999px;font-size:12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
       white-space:nowrap;
     }
-    .chip.ok{border-color:rgba(34,197,94,.55); background:rgba(34,197,94,.10); color:#bbf7d0}
-    .chip.warn{border-color:rgba(245,158,11,.55); background:rgba(245,158,11,.10); color:#fde68a}
-    .chip.bad{border-color:rgba(239,68,68,.55); background:rgba(239,68,68,.10); color:#fecaca}
-    .modal{
-      position:fixed; inset:0; background:rgba(0,0,0,.55);
-      display:none; align-items:center; justify-content:center; padding:16px; z-index:999;
+    .tag.ok{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.12);color:#bbf7d0}
+    .tag.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.12);color:#fde68a}
+    .tag.gray{border-color:rgba(148,163,184,.25);background:rgba(148,163,184,.08);color:#cbd5e1}
+    .tag.done{border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.12);color:#bfdbfe}
+    .miniBtn{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color:var(--text);
+      padding:7px 10px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-size:12px;
+      font-weight:650;
+      margin-right:6px;
     }
-    .modal .box{
-      width:min(760px, 100%); border:1px solid var(--line); border-radius:18px;
-      background:rgba(8,12,20,.92); box-shadow:var(--shadow); overflow:hidden;
+    .miniBtn:hover{background: rgba(255,255,255,.08);}
+    .miniBtn.danger{border-color:rgba(239,68,68,.25);background: rgba(239,68,68,.14);}
+    .miniBtn.danger:hover{background: rgba(239,68,68,.20);}
+    footer{
+      margin-top:18px;
+      text-align:center;
+      color:rgba(148,163,184,.6);
+      font-size:12px;
     }
-    .modal .box .hd{background:rgba(17,24,39,.75)}
-    .modal .box .bd{padding:14px}
-    .scanner{
-      border:1px solid var(--line); border-radius:14px; overflow:hidden; background:rgba(0,0,0,.18);
-    }
-    .two{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
-    @media (max-width: 860px){ .two{grid-template-columns:1fr} }
   </style>
-
-  <!-- 条形码：JsBarcode（CODE128） -->
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-
-  <!-- 扫码：html5-qrcode（支持摄像头扫码条形码/二维码，条形码效果取决于设备与浏览器） -->
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>归宿照片拍摄预定系统（后台系统版）</h1>
-        <div class="sub">预约上云 + 成功页条形码 + 管理端：搜索 / 扫码定位 / 状态流转 / 删除 / 导出</div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <h1>归宿照片拍摄预约系统</h1>
+      <div class="sub">Made by Recycle</div>
+    </div>
+    <button class="btn" id="btnOpenAdmin">管理员登录</button>
+  </div>
+
+  <div class="grid">
+    <!-- Guest -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <h2>填写信息</h2>
+        <span class="pill" id="pillNo">预约编号：—</span>
       </div>
-      <div class="pill">
-        <div class="badge">云端：<span id="cloudState" class="mono">未连接</span></div>
-        <div class="badge">登录：<span id="authState">未登录</span></div>
-        <div class="badge">记录：<span id="count">0</span></div>
+
+      <div class="row">
+        <div class="field">
+          <label>游戏昵称 *</label>
+          <input id="gameName" placeholder="请输入游戏里的昵称" maxlength="32" />
+        </div>
+        <div class="field">
+          <label>游戏数字ID *</label>
+          <input id="gameId" placeholder="仅数字" inputmode="numeric" maxlength="18" />
+        </div>
+        <div class="field">
+          <label>微信昵称 *</label>
+          <input id="wxName" placeholder="请输入常用微信昵称" maxlength="32" />
+        </div>
+        <div class="field">
+          <label>手机号 *</label>
+          <input id="phone" placeholder="请输入手机号" inputmode="numeric" maxlength="20" />
+        </div>
       </div>
-    </header>
 
-    <div class="grid">
-      <!-- 左：Guest -->
-      <section class="card">
-        <div class="hd">
-          <h2>预约提交（Guest）</h2>
-          <div class="tabs">
-            <button class="tab active" data-panel="p_guest">填写预约</button>
-            <button class="tab" data-panel="p_success">预约成功</button>
-          </div>
+      <div class="row" style="margin-top:10px;">
+        <div class="field">
+          <label>预定归宿 *</label>
+          <select id="house">
+            <option value="迷雾山庄">迷雾山庄</option>
+            <option value="林泉池馆">林泉池馆</option>
+            <option value="221B">221B</option>
+            <option value="沉默的律师事务所">沉默的律师事务所</option>
+            <option value="庄园之声">庄园之声</option>
+            <option value="德罗斯小姐的公寓">德罗斯小姐的公寓</option>
+          </select>
         </div>
-        <div class="bd">
-          <div id="p_guest">
-            <div class="row">
-              <div>
-                <label>游戏昵称 *</label>
-                <input id="g_nick" maxlength="32" placeholder="请输入游戏昵称" />
-              </div>
-              <div>
-                <label>游戏数字ID *</label>
-                <input id="g_id" maxlength="20" inputmode="numeric" placeholder="仅数字" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>微信昵称 *</label>
-                <input id="g_wechat" maxlength="32" placeholder="常用微信昵称" />
-              </div>
-              <div>
-                <label>手机号 *</label>
-                <input id="g_phone" maxlength="20" inputmode="tel" placeholder="请输入手机号" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>预定归宿 *</label>
-                <select id="g_house">
-                  <option value="迷雾山庄">迷雾山庄</option>
-                  <option value="林泉池馆">林泉池馆</option>
-                  <option value="221B">221B</option>
-                  <option value="沉默的律师事务所">沉默的律师事务所</option>
-                  <option value="庄园之声">庄园之声</option>
-                  <option value="德罗斯小姐的公寓">德罗斯小姐的公寓</option>
-                </select>
-              </div>
-              <div>
-                <label>日期 *</label>
-                <input id="g_date" type="date" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>拍照主题数 *</label>
-                <input id="g_count" type="number" min="1" max="50" value="1" />
-              </div>
-              <div>
-                <label>拍照主题 *</label>
-                <input id="g_theme" maxlength="80" placeholder="例如：情侣/复古/夜景/生日" />
-              </div>
-            </div>
-
-            <label>补充说明（选填）</label>
-            <textarea id="g_note" placeholder="其他要求 / 风格 / 备注"></textarea>
-
-            <div class="actions">
-              <button class="primary" id="btnSubmit">预约并确认</button>
-              <button id="btnReset">重置</button>
-            </div>
-
-            <div class="hint" id="guestHint"></div>
-
-            <div class="note" style="margin-top:12px">
-              提示：提交成功后会生成预约编号，并展示条形码。管理员可在右侧后台扫码或搜索定位。
-            </div>
-          </div>
-
-          <div id="p_success" class="hide">
-            <div class="note">
-              <div>预约编号：<span class="mono" id="s_no">-</span></div>
-              <div>当前状态：<span id="s_status" class="chip warn">待处理</span></div>
-              <div>提交时间：<span class="mono" id="s_time">-</span></div>
-            </div>
-
-            <div class="barcode-wrap">
-              <div class="small" style="margin-bottom:8px">条形码（内容=预约编号）</div>
-              <svg id="barcode"></svg>
-            </div>
-
-            <div class="actions">
-              <button class="good" id="btnCopyNo">复制预约编号</button>
-              <button id="btnBack">返回</button>
-            </div>
-
-            <div class="hint" id="successHint"></div>
-          </div>
+        <div class="field">
+          <label>日期 *</label>
+          <input id="date" type="date" />
         </div>
-      </section>
-
-      <!-- 右：Admin -->
-      <aside class="card">
-        <div class="hd">
-          <h2>管理后台（Admin）</h2>
-          <div class="tabs">
-            <button class="tab active" data-admin="login">登录</button>
-            <button class="tab" data-admin="panel">后台</button>
-          </div>
+        <div class="field">
+          <label>拍照主题数 *</label>
+          <input id="topicCount" value="1" inputmode="numeric" maxlength="2" />
         </div>
-
-        <div class="bd">
-          <div id="a_login">
-            <label>管理员邮箱（Firebase Auth）</label>
-            <input id="a_email" placeholder="admin@example.com" />
-
-            <label>管理员密码</label>
-            <input id="a_pass" type="password" placeholder="密码" />
-
-            <div class="actions">
-              <button class="good" id="btnLogin">登录</button>
-              <button class="bad" id="btnLogout">退出</button>
-            </div>
-
-            <div class="hint" id="adminHint"></div>
-
-            <div class="note" style="margin-top:12px">
-              后台系统版新增：扫码定位、状态流转、删除、导出CSV。  
-              规则建议：任何人可提交（create），只有登录用户可查/改/删。
-            </div>
-          </div>
-
-          <div id="a_panel" class="hide">
-            <div class="row">
-              <div>
-                <label>搜索（编号/昵称/微信/手机号/主题）</label>
-                <input id="q" placeholder="例如：R-5FCB214 / 138..." />
-              </div>
-              <div>
-                <label>快捷操作</label>
-                <div class="actions" style="margin-top:0">
-                  <button class="primary" id="btnRefresh">刷新</button>
-                  <button class="info" id="btnScan">扫码</button>
-                  <button id="btnExport">导出CSV</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>状态筛选</label>
-                <select id="filterStatus">
-                  <option value="ALL">全部</option>
-                  <option value="PENDING">待处理</option>
-                  <option value="CONFIRMED">已确认</option>
-                  <option value="DONE">已完成</option>
-                  <option value="CANCELLED">已取消</option>
-                </select>
-              </div>
-              <div>
-                <label>仅显示今天（按提交日期）</label>
-                <select id="filterToday">
-                  <option value="NO">否</option>
-                  <option value="YES">是</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="margin-top:12px;overflow:auto">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width:150px">提交时间</th>
-                    <th style="width:160px">预约编号</th>
-                    <th style="width:110px">状态</th>
-                    <th>昵称</th>
-                    <th style="width:120px">微信</th>
-                    <th style="width:130px">手机号</th>
-                    <th style="width:120px">归宿</th>
-                    <th style="width:120px">日期</th>
-                    <th>主题</th>
-                    <th style="width:170px">操作</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody">
-                  <tr><td colspan="10" style="color:var(--muted)">未登录或暂无数据</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="hint" id="panelHint"></div>
-
-            <div class="note" style="margin-top:12px">
-              小技巧：扫码得到的“预约编号”会自动填进搜索框并定位结果。  
-              状态说明：待处理 → 已确认 → 已完成（或可改为已取消）。
-            </div>
-          </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label>拍照主题 *</label>
+          <textarea id="topics" placeholder="请写出与数量对应的拍照主题和你的要求"></textarea>
+          <div class="muted" style="margin-top:6px;">提示：归宿类型仅用于安排拍摄方案；提交后请保存预约编号。</div>
         </div>
-      </aside>
+      </div>
+
+      <div class="chk">
+        <input id="agree" type="checkbox" />
+        <span>我已阅读并同意《隐私与预约条款》</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnSubmit">预约并确认</button>
+        <button class="btn" id="btnReset" type="button">重置</button>
+        <span class="status" id="guestStatus"></span>
+      </div>
     </div>
 
-    <div class="note" style="margin-top:14px">
-      <div style="font-weight:900;color:var(--text);margin-bottom:6px">你只需要改一处：firebaseConfig</div>
-      <div class="small">
-        1）Firebase：开 Auth（邮箱/密码）+ Firestore。<br/>
-        2）把本文件脚本里的 <span class="mono">firebaseConfig</span> 换成你的 Web 配置。<br/>
-        3）把本文件命名为 <span class="mono">index.html</span> 覆盖到 GitHub Pages 仓库根目录即可。
+    <!-- Right info -->
+    <div>
+      <div class="card" style="margin-bottom:18px;">
+        <h2>使用说明</h2>
+        <div class="notice">
+          <div style="margin-top:2px;">•</div>
+          <div>
+            填写必填信息并选择归宿与日期，提交后将生成预约编号。<br/>
+            预约编号可用于后续核对，请自行保存。
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>今日受理状态</h2>
+        <div class="muted">客户可正常提交</div>
       </div>
     </div>
   </div>
 
-  <!-- 扫码弹窗 -->
-  <div class="modal" id="scanModal" aria-hidden="true">
-    <div class="box">
-      <div class="hd">
-        <h2>扫码定位（预约编号）</h2>
-        <div class="actions" style="margin-top:0">
-          <button id="btnStopScan">关闭</button>
-        </div>
+  <!-- Admin section (hidden until login) -->
+  <div class="card adminWrap" id="adminWrap" style="margin-top:18px;">
+    <div class="adminTop">
+      <div class="left">
+        <strong style="font-size:14px;">管理端</strong>
+        <span class="pill" id="adminUserPill">未登录</span>
       </div>
-      <div class="bd">
-        <div class="two">
-          <div>
-            <div class="note" style="margin-bottom:12px">
-              把条形码对准摄像头。识别到编号后会自动填入搜索框并刷新列表。  
-              <span class="small">注：部分设备对“条形码”识别能力不如“二维码”。如果识别不稳定，建议同时提供“手动输入编号”。</span>
-            </div>
-            <div class="scanner">
-              <div id="qrRegion" style="width:100%;"></div>
-            </div>
-          </div>
-          <div>
-            <label>手动输入预约编号</label>
-            <input id="manualNo" placeholder="例如：R-5FCB214" />
-            <div class="actions">
-              <button class="primary" id="btnUseManual">使用并搜索</button>
-            </div>
-            <div class="hint" id="scanHint"></div>
-            <div class="note" style="margin-top:12px">
-              如果你希望“100%扫码成功”，我建议把条形码升级成二维码（二维码识别更稳）。  
-              你如果说“加二维码”，我直接给你下一版。
-            </div>
-          </div>
-        </div>
+      <div class="left">
+        <input id="adminSearch" placeholder="搜索：预约编号 / 昵称 / 手机 / 日期" style="width:min(360px,100%);padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:rgba(10,15,30,.55);color:var(--text);"/>
+        <select id="adminFilterStatus" style="width:170px;">
+          <option value="ALL">全部状态</option>
+          <option value="PENDING">待处理</option>
+          <option value="CONFIRMED">已确认</option>
+          <option value="DONE">已完成</option>
+        </select>
+        <button class="btn" id="btnExport">导出CSV</button>
+        <button class="btn danger" id="btnLogout">退出登录</button>
       </div>
     </div>
-  </div>
 
-  <!-- Firebase (modular CDN) -->
-  <script type="module">
-    /************************************************************
-     * 只改这里：把 firebaseConfig 换成你自己的（Firebase Web 配置）
-     ************************************************************/
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+    <div class="muted" id="adminTip" style="margin-bottom:10px;"></div>
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import {
-      getFirestore, collection, addDoc, serverTimestamp, query, orderBy, getDocs,
-      doc, updateDoc, deleteDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-    const $ = (id)=>document.getElementById(id);
-    const setText = (id, t)=>{ $(id).textContent = t; };
-    const showHint = (el, html)=>{ el.innerHTML = html; };
-
-    function activateTab(groupSelector, btn){
-      document.querySelectorAll(groupSelector).forEach(x=>x.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    // Guest tabs
-    document.querySelectorAll('[data-panel]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const key = btn.dataset.panel;
-        activateTab('[data-panel]', btn);
-        $('p_guest').classList.toggle('hide', key !== 'p_guest');
-        $('p_success').classList.toggle('hide', key !== 'p_success');
-      });
-    });
-
-    // Admin tabs
-    document.querySelectorAll('[data-admin]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const key = btn.dataset.admin;
-        activateTab('[data-admin]', btn);
-        $('a_login').classList.toggle('hide', key !== 'login');
-        $('a_panel').classList.toggle('hide', key !== 'panel');
-      });
-    });
-
-    // Make reservation no: R-XXXXXXX (hex-like)
-    function makeReservationNo(){
-      const chars = "0123456789ABCDEF";
-      let s = "R-";
-      for(let i=0;i<7;i++) s += chars[Math.floor(Math.random()*chars.length)];
-      return s;
-    }
-    const nowISO = ()=> new Date().toISOString();
-
-    function statusLabel(status){
-      switch(status){
-        case "PENDING": return {text:"待处理", cls:"warn"};
-        case "CONFIRMED": return {text:"已确认", cls:"ok"};
-        case "DONE": return {text:"已完成", cls:"ok"};
-        case "CANCELLED": return {text:"已取消", cls:"bad"};
-        default: return {text:"未知", cls:"warn"};
-      }
-    }
-
-    function sanitizePhone(s){
-      return s.replace(/[^\d+\-\s]/g,'').trim();
-    }
-
-    // Firebase init
-    let app, auth, db;
-    try{
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-      setText('cloudState', '已连接');
-    }catch(e){
-      console.error(e);
-      setText('cloudState', '配置错误');
-      showHint($('guestHint'), `<span class="bad">Firebase 配置未填写或错误：请先替换 firebaseConfig。</span>`);
-    }
-
-    const colRef = ()=> collection(db, "applications"); // 云端集合名（你也可以改）
-    let isAuthed = false;
-
-    if(auth){
-      onAuthStateChanged(auth, (user)=>{
-        isAuthed = !!user;
-        setText('authState', user ? `已登录：${user.email}` : '未登录');
-        refreshList().catch(()=>{});
-      });
-    }
-
-    // Guest reset
-    $('btnReset').addEventListener('click', ()=>{
-      $('g_nick').value = '';
-      $('g_id').value = '';
-      $('g_wechat').value = '';
-      $('g_phone').value = '';
-      $('g_house').value = '迷雾山庄';
-      $('g_date').value = '';
-      $('g_count').value = 1;
-      $('g_theme').value = '';
-      $('g_note').value = '';
-      showHint($('guestHint'), '');
-    });
-
-    // Guest submit
-    $('btnSubmit').addEventListener('click', async ()=>{
-      if(!db){
-        showHint($('guestHint'), `<span class="bad">Firebase 未就绪：先填好 firebaseConfig。</span>`);
-        return;
-      }
-      const nick = $('g_nick').value.trim();
-      const gid = $('g_id').value.trim();
-      const wechat = $('g_wechat').value.trim();
-      const phone = sanitizePhone($('g_phone').value);
-      const house = $('g_house').value;
-      const date = $('g_date').value;
-      const topicsCount = Number($('g_count').value || 1);
-      const theme = $('g_theme').value.trim();
-      const note = $('g_note').value.trim();
-
-      if(!nick || !gid || !wechat || !phone || !house || !date || !theme || !(topicsCount>=1)){
-        showHint($('guestHint'), `<span class="bad">请把带 * 的必填项填完。</span>`);
-        return;
-      }
-      if(!/^\d+$/.test(gid)){
-        showHint($('guestHint'), `<span class="bad">游戏数字ID 必须是纯数字。</span>`);
-        return;
-      }
-
-      const reservationNo = makeReservationNo();
-      showHint($('guestHint'), `正在上传云端…`);
-
-      try{
-        await addDoc(colRef(), {
-          reservationNo,
-          status: "PENDING",
-          nick, gameId: gid, wechat, phone,
-          house, date,
-          topicsCount,
-          theme, note: note || "",
-          createdAt: serverTimestamp(),
-          createdAtISO: nowISO()
-        });
-
-        // Switch to success
-        $('p_guest').classList.add('hide');
-        $('p_success').classList.remove('hide');
-        const successTab = document.querySelector('[data-panel="p_success"]');
-        activateTab('[data-panel]', successTab);
-
-        setText('s_no', reservationNo);
-        setText('s_time', new Date().toLocaleString());
-        const st = statusLabel("PENDING");
-        $('s_status').textContent = st.text;
-        $('s_status').className = `chip ${st.cls}`;
-
-        // Barcode
-        try{
-          JsBarcode("#barcode", reservationNo, {
-            format: "CODE128",
-            displayValue: true,
-            fontSize: 14,
-            margin: 12,
-            height: 72
-          });
-          showHint($('successHint'), `<span class="ok">预约成功，已上传云端。</span>`);
-        }catch(err){
-          console.error(err);
-          showHint($('successHint'), `<span class="bad">预约已提交，但条形码生成失败。</span>`);
-        }
-
-        if(isAuthed) await refreshList();
-      }catch(e){
-        console.error(e);
-        showHint($('guestHint'), `<span class="bad">上传失败：${e?.message || e}</span>`);
-      }
-    });
-
-    $('btnBack').addEventListener('click', ()=>{
-      $('p_success').classList.add('hide');
-      $('p_guest').classList.remove('hide');
-      const guestTab = document.querySelector('[data-panel="p_guest"]');
-      activateTab('[data-panel]', guestTab);
-      showHint($('successHint'), '');
-    });
-
-    $('btnCopyNo').addEventListener('click', async ()=>{
-      const t = $('s_no').textContent;
-      try{
-        await navigator.clipboard.writeText(t);
-        showHint($('successHint'), `<span class="ok">已复制：${t}</span>`);
-      }catch{
-        showHint($('successHint'), `<span class="bad">复制失败，请手动复制。</span>`);
-      }
-    });
-
-    // Admin login/logout
-    $('btnLogin').addEventListener('click', async ()=>{
-      if(!auth){
-        showHint($('adminHint'), `<span class="bad">Firebase Auth 未就绪：先填好 firebaseConfig。</span>`);
-        return;
-      }
-      const email = $('a_email').value.trim();
-      const pass = $('a_pass').value;
-      if(!email || !pass){
-        showHint($('adminHint'), `<span class="bad">请输入管理员邮箱和密码。</span>`);
-        return;
-      }
-      showHint($('adminHint'), `登录中…`);
-      try{
-        await signInWithEmailAndPassword(auth, email, pass);
-        showHint($('adminHint'), `<span class="ok">登录成功。</span>`);
-      }catch(e){
-        console.error(e);
-        showHint($('adminHint'), `<span class="bad">登录失败：${e?.message || e}</span>`);
-      }
-    });
-
-    $('btnLogout').addEventListener('click', async ()=>{
-      if(!auth) return;
-      try{
-        await signOut(auth);
-        showHint($('adminHint'), `已退出。`);
-      }catch(e){
-        console.error(e);
-        showHint($('adminHint'), `<span class="bad">退出失败：${e?.message || e}</span>`);
-      }
-    });
-
-    // Filters / refresh
-    $('btnRefresh').addEventListener('click', ()=> refreshList().catch(e=>{
-      console.error(e);
-      showHint($('panelHint'), `<span class="bad">刷新失败：${e?.message || e}</span>`);
-    }));
-    $('q').addEventListener('input', ()=> refreshList().catch(()=>{}));
-    $('filterStatus').addEventListener('change', ()=> refreshList().catch(()=>{}));
-    $('filterToday').addEventListener('change', ()=> refreshList().catch(()=>{}));
-
-    function isSameDayISO(iso, y, m, d){
-      try{
-        const dt = new Date(iso);
-        return dt.getFullYear()===y && (dt.getMonth()+1)===m && dt.getDate()===d;
-      }catch{return false;}
-    }
-
-    async function refreshList(){
-      if(!db){
-        setText('count', '0');
-        return;
-      }
-      if(!isAuthed){
-        $('tbody').innerHTML = `<tr><td colspan="10" style="color:var(--muted)">未登录</td></tr>`;
-        setText('count', '0');
-        showHint($('panelHint'), `登录后可进入后台。`);
-        window.__lastRows = [];
-        return;
-      }
-
-      const qtxt = $('q').value.trim().toLowerCase();
-      const statusFilter = $('filterStatus').value;
-      const todayOnly = $('filterToday').value === "YES";
-      const now = new Date();
-      const y = now.getFullYear(), m = now.getMonth()+1, d = now.getDate();
-
-      showHint($('panelHint'), `读取云端数据…`);
-
-      const qy = query(colRef(), orderBy("createdAt", "desc"));
-      const snap = await getDocs(qy);
-
-      const rows = [];
-      snap.forEach(docSnap=>{
-        const d0 = docSnap.data();
-        rows.push({
-          _docId: docSnap.id,
-          createdAtISO: d0.createdAtISO || "",
-          reservationNo: d0.reservationNo || "",
-          status: d0.status || "PENDING",
-          nick: d0.nick || "",
-          wechat: d0.wechat || "",
-          phone: d0.phone || "",
-          house: d0.house || "",
-          date: d0.date || "",
-          theme: d0.theme || "",
-          topicsCount: d0.topicsCount ?? "",
-          note: d0.note || ""
-        });
-      });
-
-      let filtered = rows;
-
-      if(statusFilter !== "ALL"){
-        filtered = filtered.filter(r => r.status === statusFilter);
-      }
-      if(todayOnly){
-        filtered = filtered.filter(r => r.createdAtISO && isSameDayISO(r.createdAtISO, y, m, d));
-      }
-      if(qtxt){
-        filtered = filtered.filter(r=>{
-          const pack = `${r.reservationNo} ${r.nick} ${r.wechat} ${r.phone} ${r.theme} ${r.house} ${r.date}`.toLowerCase();
-          return pack.includes(qtxt);
-        });
-      }
-
-      setText('count', String(filtered.length));
-      window.__lastRows = filtered;
-
-      if(filtered.length === 0){
-        $('tbody').innerHTML = `<tr><td colspan="10" style="color:var(--muted)">暂无匹配记录</td></tr>`;
-        showHint($('panelHint'), `无结果。`);
-        return;
-      }
-
-      const esc = (s)=> String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-
-      $('tbody').innerHTML = filtered.map(r=>{
-        const t = r.createdAtISO ? new Date(r.createdAtISO).toLocaleString() : '-';
-        const st = statusLabel(r.status);
-        const chip = `<span class="chip ${st.cls}">${st.text}</span>`;
-
-        return `
+    <div style="overflow:auto;">
+      <table class="table" id="adminTable">
+        <thead>
           <tr>
-            <td class="mono">${esc(t)}</td>
-            <td class="mono">${esc(r.reservationNo)}</td>
-            <td>${chip}</td>
-            <td>${esc(r.nick)}</td>
-            <td>${esc(r.wechat)}</td>
-            <td class="mono">${esc(r.phone)}</td>
-            <td>${esc(r.house)}</td>
-            <td class="mono">${esc(r.date)}</td>
-            <td>${esc(r.theme)}</td>
-            <td>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="warn" data-act="next" data-id="${esc(r._docId)}">下一状态</button>
-                <button class="info" data-act="detail" data-id="${esc(r._docId)}">详情</button>
-                <button class="bad" data-act="del" data-id="${esc(r._docId)}">删除</button>
-              </div>
-            </td>
-          </tr>`;
-      }).join('');
+            <th style="min-width:120px;">预约编号</th>
+            <th style="min-width:90px;">状态</th>
+            <th style="min-width:120px;">日期</th>
+            <th style="min-width:130px;">归宿</th>
+            <th style="min-width:120px;">游戏昵称</th>
+            <th style="min-width:110px;">微信昵称</th>
+            <th style="min-width:120px;">手机号</th>
+            <th style="min-width:90px;">主题数</th>
+            <th style="min-width:220px;">主题</th>
+            <th style="min-width:220px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="adminTbody"></tbody>
+      </table>
+    </div>
+  </div>
 
-      // bind action buttons
-      document.querySelectorAll('button[data-act]').forEach(btn=>{
-        btn.addEventListener('click', async ()=>{
-          const act = btn.dataset.act;
-          const id = btn.dataset.id;
-          const row = window.__lastRows.find(x=>x._docId===id);
-          if(!row) return;
+  <footer>© 2026 归宿照片拍摄预约系统</footer>
+</div>
 
-          if(act==="next"){
-            const next = (s)=>{
-              if(s==="PENDING") return "CONFIRMED";
-              if(s==="CONFIRMED") return "DONE";
-              if(s==="DONE") return "DONE";
-              if(s==="CANCELLED") return "CANCELLED";
-              return "PENDING";
-            };
-            const newStatus = next(row.status);
-            try{
-              await updateDoc(doc(db, "applications", id), { status: newStatus });
-              showHint($('panelHint'), `<span class="ok">状态已更新：${statusLabel(newStatus).text}</span>`);
-              await refreshList();
-            }catch(e){
-              console.error(e);
-              showHint($('panelHint'), `<span class="bad">更新失败：${e?.message || e}</span>`);
-            }
-          }
+<!-- Success modal -->
+<div class="mask" id="successMask" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalHead">
+      <strong>预约成功</strong>
+      <button class="x" id="btnCloseSuccess" aria-label="关闭">×</button>
+    </div>
+    <div class="modalBody">
+      <div class="muted" style="margin-bottom:10px;">请保存预约编号。到店出示条形码可快速核对。</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <span class="pill" id="successNo">预约编号：—</span>
+        <button class="btn" id="btnCopyNo" type="button">复制编号</button>
+      </div>
+      <div class="barcodeBox">
+        <svg id="barcode"></svg>
+      </div>
+    </div>
+  </div>
+</div>
 
-          if(act==="del"){
-            const ok = confirm(`确认删除预约 ${row.reservationNo} ？此操作不可恢复。`);
-            if(!ok) return;
-            try{
-              await deleteDoc(doc(db, "applications", id));
-              showHint($('panelHint'), `<span class="ok">已删除：${row.reservationNo}</span>`);
-              await refreshList();
-            }catch(e){
-              console.error(e);
-              showHint($('panelHint'), `<span class="bad">删除失败：${e?.message || e}</span>`);
-            }
-          }
+<!-- Admin login modal -->
+<div class="mask" id="adminMask" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalHead">
+      <strong>管理员登录</strong>
+      <button class="x" id="btnCloseAdmin" aria-label="关闭">×</button>
+    </div>
+    <div class="modalBody">
+      <div class="field">
+        <label>邮箱</label>
+        <input id="adminEmail" placeholder="请输入管理员邮箱" autocomplete="username" />
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>密码</label>
+        <input id="adminPass" type="password" placeholder="请输入密码" autocomplete="current-password" />
+      </div>
+      <div class="actions" style="margin-top:14px;">
+        <button class="btn primary" id="btnAdminLogin">登录</button>
+        <span class="status" id="adminStatus"></span>
+      </div>
+    </div>
+  </div>
+</div>
 
-          if(act==="detail"){
-            const info = [
-              `预约编号：${row.reservationNo}`,
-              `状态：${statusLabel(row.status).text}`,
-              `昵称：${row.nick}`,
-              `游戏ID：${row.gameId || "(未存)"}`
-            ].join("\n");
-            // 简单弹窗：用 alert，不花哨但够用
-            alert(
-              `预约详情\n\n` +
-              `预约编号：${row.reservationNo}\n` +
-              `状态：${statusLabel(row.status).text}\n` +
-              `提交时间：${row.createdAtISO ? new Date(row.createdAtISO).toLocaleString() : "-"}\n` +
-              `昵称：${row.nick}\n` +
-              `微信：${row.wechat}\n` +
-              `手机号：${row.phone}\n` +
-              `归宿：${row.house}\n` +
-              `日期：${row.date}\n` +
-              `主题：${row.theme}\n` +
-              `主题数：${row.topicsCount}\n` +
-              `备注：${row.note || "-"}`
-            );
-          }
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- JsBarcode -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+<script>
+  // ====== Firebase config (YOUR project) ======
+  const firebaseConfig = {
+    apiKey: "AIzaSyCgMEVgfUTtVArQ-wtg-Il605o80PFhuFE",
+    authDomain: "photo-order-6bba4.firebaseapp.com",
+    projectId: "photo-order-6bba4",
+    storageBucket: "photo-order-6bba4.firebasestorage.app",
+    messagingSenderId: "411864836639",
+    appId: "1:411864836639:web:50fff0fed782925d4d832a"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  // ====== utils ======
+  const $ = (id) => document.getElementById(id);
+  const show = (el, on=true) => on ? el.classList.add('show') : el.classList.remove('show');
+  const safeText = (v) => (v ?? "").toString().trim();
+
+  function genNo(){
+    // R- + 8 chars
+    const rand = Math.random().toString(36).slice(2, 10).toUpperCase();
+    return "R-" + rand;
+  }
+
+  function setStatus(el, msg, ok=null){
+    el.textContent = msg || "";
+    if(ok === true) el.style.color = "#bbf7d0";
+    else if(ok === false) el.style.color = "#fecaca";
+    else el.style.color = "var(--muted)";
+  }
+
+  function statusTag(status){
+    if(status === "PENDING") return '<span class="tag gray">待处理</span>';
+    if(status === "CONFIRMED") return '<span class="tag warn">已确认</span>';
+    if(status === "DONE") return '<span class="tag done">已完成</span>';
+    return '<span class="tag gray">—</span>';
+  }
+
+  function nextStatus(status){
+    if(status === "PENDING") return "CONFIRMED";
+    if(status === "CONFIRMED") return "DONE";
+    return "DONE";
+  }
+
+  function fmtDate(value){
+    if(!value) return "";
+    if(typeof value === "string") return value;
+    try{
+      const d = value.toDate ? value.toDate() : new Date(value);
+      if(Number.isNaN(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${dd}`;
+    }catch(e){ return ""; }
+  }
+
+  function csvEscape(s){
+    s = (s ?? "").toString();
+    if(/[",\\n]/.test(s)) return '"' + s.replaceAll('"','""') + '"';
+    return s;
+  }
+
+  // ====== Guest submit ======
+  const guestStatus = $("guestStatus");
+  const pillNo = $("pillNo");
+
+  $("btnReset").addEventListener("click", ()=>{
+    $("gameName").value = "";
+    $("gameId").value = "";
+    $("wxName").value = "";
+    $("phone").value = "";
+    $("date").value = "";
+    $("topicCount").value = "1";
+    $("topics").value = "";
+    $("agree").checked = false;
+    pillNo.textContent = "预约编号：—";
+    setStatus(guestStatus, "");
+  });
+
+  $("btnSubmit").addEventListener("click", async ()=>{
+    setStatus(guestStatus, "正在提交…");
+    try{
+      const gameName = safeText($("gameName").value);
+      const gameId = safeText($("gameId").value);
+      const wxName = safeText($("wxName").value);
+      const phone = safeText($("phone").value);
+      const house = $("house").value;
+      const date = $("date").value;
+      const topicCount = safeText($("topicCount").value);
+      const topics = safeText($("topics").value);
+      const agree = $("agree").checked;
+
+      if(!agree) return setStatus(guestStatus, "请先勾选同意条款。", false);
+      if(!gameName || !gameId || !wxName || !phone || !house || !date || !topicCount || !topics){
+        return setStatus(guestStatus, "请把必填项填写完整。", false);
+      }
+      if(!/^[0-9]+$/.test(gameId)) return setStatus(guestStatus, "游戏数字ID需为纯数字。", false);
+      if(!/^[0-9]+$/.test(topicCount) || Number(topicCount) < 1) return setStatus(guestStatus, "拍照主题数需为≥1的数字。", false);
+
+      const no = genNo();
+      const payload = {
+        no,
+        gameName,
+        gameId,
+        wxName,
+        phone,
+        house,
+        date,
+        topicCount: Number(topicCount),
+        topics,
+        status: "PENDING",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      await db.collection("applications").doc(no).set(payload);
+
+      pillNo.textContent = "预约编号：" + no;
+      $("successNo").textContent = "预约编号：" + no;
+
+      // barcode
+      try{
+        JsBarcode("#barcode", no, {
+          format:"CODE128",
+          displayValue:true,
+          fontSize:14,
+          height:70,
+          margin:10
         });
-      });
+      }catch(e){ /* ignore */ }
 
-      showHint($('panelHint'), `<span class="ok">已加载 ${filtered.length} 条。</span>`);
+      show($("successMask"), true);
+      setStatus(guestStatus, "提交成功。", true);
+
+    }catch(err){
+      console.error(err);
+      setStatus(guestStatus, "提交失败，请稍后重试。", false);
     }
+  });
 
-    // Export CSV
-    $('btnExport').addEventListener('click', ()=>{
-      const data = window.__lastRows || [];
-      if(!data.length){
-        showHint($('panelHint'), `<span class="bad">没有可导出的数据。</span>`);
-        return;
-      }
-      const header = ["createdAtISO","reservationNo","status","nick","wechat","phone","house","date","topicsCount","theme","note"];
-      const csv = [
-        header.join(','),
-        ...data.map(r=> header.map(k=>{
-          const v = (r[k] ?? '').toString().replaceAll('"','""');
-          return `"${v}"`;
-        }).join(','))
-      ].join('\n');
+  // success modal
+  $("btnCloseSuccess").addEventListener("click", ()=> show($("successMask"), false));
+  $("successMask").addEventListener("click", (e)=>{ if(e.target === $("successMask")) show($("successMask"), false); });
+  $("btnCopyNo").addEventListener("click", async ()=>{
+    const txt = $("successNo").textContent.replace("预约编号：","").trim();
+    try{
+      await navigator.clipboard.writeText(txt);
+      $("btnCopyNo").textContent = "已复制";
+      setTimeout(()=> $("btnCopyNo").textContent = "复制编号", 900);
+    }catch(e){
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      $("btnCopyNo").textContent = "已复制";
+      setTimeout(()=> $("btnCopyNo").textContent = "复制编号", 900);
+    }
+  });
 
-      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `applications_${new Date().toISOString().slice(0,19).replaceAll(':','-')}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showHint($('panelHint'), `<span class="ok">已导出 CSV。</span>`);
-    });
+  // ====== Admin login ======
+  const adminWrap = $("adminWrap");
+  const adminStatus = $("adminStatus");
+  const adminTip = $("adminTip");
+  const adminTbody = $("adminTbody");
+  const adminUserPill = $("adminUserPill");
 
-    // ===== Scanner modal =====
-    let html5Qr = null;
-    const modal = $('scanModal');
-    const openModal = ()=>{
-      modal.style.display = 'flex';
-      modal.setAttribute('aria-hidden','false');
-    };
-    const closeModal = async ()=>{
-      modal.style.display = 'none';
-      modal.setAttribute('aria-hidden','true');
-      $('scanHint').textContent = '';
-      try{
-        if(html5Qr){
-          await html5Qr.stop();
-          await html5Qr.clear();
-        }
-      }catch{}
-      html5Qr = null;
-    };
+  let cacheApps = []; // admin list cache
 
-    $('btnScan').addEventListener('click', async ()=>{
-      if(!isAuthed){
-        showHint($('panelHint'), `<span class="bad">先登录管理员。</span>`);
-        return;
-      }
-      openModal();
-      $('scanHint').textContent = '正在启动摄像头…';
-      try{
-        html5Qr = new Html5Qrcode("qrRegion");
-        const config = { fps: 10, qrbox: { width: 320, height: 220 } };
+  $("btnOpenAdmin").addEventListener("click", ()=> show($("adminMask"), true));
+  $("btnCloseAdmin").addEventListener("click", ()=> show($("adminMask"), false));
+  $("adminMask").addEventListener("click", (e)=>{ if(e.target === $("adminMask")) show($("adminMask"), false); });
 
-        await html5Qr.start(
-          { facingMode: "environment" },
-          config,
-          async (decodedText) => {
-            // 识别到内容：直接当作预约编号（条形码/二维码都可能）
-            const text = (decodedText || "").trim();
-            if(!text) return;
-            $('q').value = text;
-            $('scanHint').innerHTML = `<span class="ok">识别到：${text}</span>`;
-            await refreshList();
-            await closeModal();
-          },
-          (err) => { /* ignore scan errors */ }
-        );
-        $('scanHint').textContent = '已启动，请对准条形码。';
-      }catch(e){
-        console.error(e);
-        $('scanHint').innerHTML = `<span class="bad">启动失败：${e?.message || e}</span>`;
-      }
-    });
+  $("btnAdminLogin").addEventListener("click", async ()=>{
+    setStatus(adminStatus, "登录中…");
+    try{
+      const email = safeText($("adminEmail").value);
+      const pass = $("adminPass").value;
+      if(!email || !pass) return setStatus(adminStatus, "请输入邮箱和密码。", false);
+      await auth.signInWithEmailAndPassword(email, pass);
+      show($("adminMask"), false);
+      setStatus(adminStatus, "");
+    }catch(err){
+      console.error(err);
+      setStatus(adminStatus, "登录失败，请检查账号或密码。", false);
+    }
+  });
 
-    $('btnStopScan').addEventListener('click', ()=> closeModal());
-    modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+  $("btnLogout").addEventListener("click", async ()=>{
+    await auth.signOut();
+  });
 
-    $('btnUseManual').addEventListener('click', async ()=>{
-      const v = $('manualNo').value.trim();
-      if(!v){
-        $('scanHint').innerHTML = `<span class="bad">请输入编号。</span>`;
-        return;
-      }
-      $('q').value = v;
-      await refreshList();
-      await closeModal();
-    });
+  auth.onAuthStateChanged(async (user)=>{
+    if(user){
+      adminUserPill.textContent = "已登录：" + (user.email || "admin");
+      adminWrap.style.display = "block";
+      adminTip.textContent = "正在加载预约数据…";
+      await loadAdminData();
+    }else{
+      adminUserPill.textContent = "未登录";
+      adminWrap.style.display = "none";
+      cacheApps = [];
+      adminTbody.innerHTML = "";
+      adminTip.textContent = "";
+    }
+  });
 
-    // Initial hints
-    showHint($('guestHint'), `提示：若云端显示“配置错误”，说明 firebaseConfig 还没换成你的。`);
-    showHint($('adminHint'), `提示：用 Firebase Auth 管理员账号登录。`);
-    setTimeout(()=> refreshList().catch(()=>{}), 400);
-  </script>
-
-  <!--
-  Firestore Rules（建议）：
-  rules_version = '2';
-  service cloud.firestore {
-    match /databases/{database}/documents {
-      match /applications/{doc} {
-        allow create: if true;
-        allow read, update, delete: if request.auth != null;
-      }
+  async function loadAdminData(){
+    try{
+      // Only called after auth
+      const snap = await db.collection("applications").orderBy("createdAt","desc").get();
+      cacheApps = snap.docs.map(d => d.data());
+      adminTip.textContent = `已加载 ${cacheApps.length} 条预约`;
+      renderAdminTable();
+    }catch(err){
+      console.error(err);
+      adminTip.textContent = "加载失败（请检查 Firestore 规则或账号权限）。";
     }
   }
-  -->
+
+  function renderAdminTable(){
+    const q = safeText($("adminSearch").value).toLowerCase();
+    const fs = $("adminFilterStatus").value;
+
+    const rows = cacheApps.filter(a=>{
+      const all = [a.no,a.gameName,a.wxName,a.phone,a.date,a.house].map(x=> (x??"").toString().toLowerCase()).join(" ");
+      const hit = !q || all.includes(q);
+      const hitStatus = (fs === "ALL") || (a.status === fs);
+      return hit && hitStatus;
+    });
+
+    adminTbody.innerHTML = rows.map(a=>{
+      const statusHtml = statusTag(a.status);
+      const date = a.date || fmtDate(a.createdAt);
+      const safeTopics = (a.topics ?? "").toString().replaceAll("<","&lt;").replaceAll(">","&gt;");
+      return `
+        <tr data-no="${a.no}">
+          <td><strong>${a.no}</strong></td>
+          <td>${statusHtml}</td>
+          <td>${date || ""}</td>
+          <td>${a.house || ""}</td>
+          <td>${a.gameName || ""}</td>
+          <td>${a.wxName || ""}</td>
+          <td>${a.phone || ""}</td>
+          <td>${a.topicCount ?? ""}</td>
+          <td style="white-space:pre-wrap;">${safeTopics}</td>
+          <td>
+            <button class="miniBtn" data-act="next">下一状态</button>
+            <button class="miniBtn" data-act="copy">复制编号</button>
+            <button class="miniBtn danger" data-act="del">删除</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    if(rows.length === 0){
+      adminTbody.innerHTML = `<tr><td colspan="10" class="muted">暂无匹配数据</td></tr>`;
+    }
+  }
+
+  $("adminSearch").addEventListener("input", ()=> renderAdminTable());
+  $("adminFilterStatus").addEventListener("change", ()=> renderAdminTable());
+
+  $("adminTable").addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button");
+    if(!btn) return;
+    const tr = e.target.closest("tr");
+    if(!tr) return;
+    const no = tr.getAttribute("data-no");
+    const act = btn.getAttribute("data-act");
+    const item = cacheApps.find(x=> x.no === no);
+    if(!item) return;
+
+    if(act === "copy"){
+      try{
+        await navigator.clipboard.writeText(no);
+        btn.textContent = "已复制";
+        setTimeout(()=> btn.textContent = "复制编号", 800);
+      }catch(e){}
+      return;
+    }
+
+    if(act === "next"){
+      const ns = nextStatus(item.status || "PENDING");
+      btn.textContent = "处理中…";
+      try{
+        await db.collection("applications").doc(no).update({ status: ns, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        item.status = ns;
+        renderAdminTable();
+      }catch(err){
+        console.error(err);
+        btn.textContent = "下一状态";
+        alert("操作失败：请确认管理员已登录且 Firestore 规则允许更新。");
+      }
+      return;
+    }
+
+    if(act === "del"){
+      if(!confirm(`确认删除预约：${no}？该操作不可撤销。`)) return;
+      btn.textContent = "删除中…";
+      try{
+        await db.collection("applications").doc(no).delete();
+        cacheApps = cacheApps.filter(x=> x.no !== no);
+        renderAdminTable();
+        adminTip.textContent = `已加载 ${cacheApps.length} 条预约`;
+      }catch(err){
+        console.error(err);
+        btn.textContent = "删除";
+        alert("删除失败：请确认管理员已登录且 Firestore 规则允许删除。");
+      }
+      return;
+    }
+  });
+
+  // Export CSV (admin only)
+  $("btnExport").addEventListener("click", ()=>{
+    if(!auth.currentUser) return alert("请先登录管理员账号。");
+    const rows = cacheApps;
+    const header = ["no","status","date","house","gameName","gameId","wxName","phone","topicCount","topics","createdAt"];
+    const lines = [header.join(",")];
+
+    for(const a of rows){
+      const line = [
+        a.no, a.status, a.date, a.house, a.gameName, a.gameId, a.wxName, a.phone,
+        a.topicCount, a.topics, fmtDate(a.createdAt)
+      ].map(csvEscape).join(",");
+      lines.append(line) if False else None
+    }
+  });
+</script>
 </body>
 </html>
+"""
+
